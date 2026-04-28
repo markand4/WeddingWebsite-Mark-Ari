@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mark &amp; Ari — Wedding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <span class="nav-brand">M &amp; A</span>
+      <ul class="nav-links">
+        <li><a href="#rsvp">RSVP</a></li>
+        <li><a href="#venue">The Venue</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">We're getting married</p>
+      <h1 class="hero-names">Mark <span class="amp">&amp;</span> Ari</h1>
+      <div class="hero-divider"></div>
+      <p class="hero-date">October 17, 2026</p>
+      <p class="hero-location">Royal Palms Resort &amp; Spa &nbsp;·&nbsp; Phoenix, Arizona</p>
+      <a href="#rsvp" class="hero-cta">RSVP Now</a>
+    </div>
+  </section>
+
+  <!-- COUNTDOWN -->
+  <section id="countdown-section">
+    <div class="container countdown-wrap">
+      <div class="countdown-item"><span id="cd-days">--</span><label>Days</label></div>
+      <div class="countdown-dot"></div>
+      <div class="countdown-item"><span id="cd-hours">--</span><label>Hours</label></div>
+      <div class="countdown-dot"></div>
+      <div class="countdown-item"><span id="cd-minutes">--</span><label>Minutes</label></div>
+      <div class="countdown-dot"></div>
+      <div class="countdown-item"><span id="cd-seconds">--</span><label>Seconds</label></div>
+    </div>
+  </section>
+
+  <!-- RSVP -->
+  <section id="rsvp">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Kindly respond by September 1, 2026</p>
+        <h2 class="section-title">RSVP</h2>
+        <div class="title-divider"></div>
+      </div>
+
+      <div class="rsvp-card" id="rsvp-card">
+
+        <!-- Step 1: Name Selection -->
+        <div class="rsvp-step" id="step-select">
+          <label class="field-label" for="guest-select">Find Your Name</label>
+          <p class="field-hint">Select your name from the guest list below.</p>
+          <div class="select-wrapper">
+            <select id="guest-select">
+              <option value="">— Select your name —</option>
+            </select>
+          </div>
+          <button class="btn-primary" id="btn-next" disabled>Continue</button>
+        </div>
+
+        <!-- Step 2: RSVP Form -->
+        <div class="rsvp-step hidden" id="step-form">
+          <p class="rsvp-greeting">Hello, <strong id="guest-name-display"></strong>!</p>
+
+          <!-- Attending -->
+          <fieldset class="field-group">
+            <legend class="field-label">Will you be attending?</legend>
+            <div class="radio-row">
+              <label class="radio-card">
+                <input type="radio" name="attending" value="yes" />
+                <span class="radio-label">Joyfully accepts</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="attending" value="no" />
+                <span class="radio-label">Regretfully declines</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <!-- Meal choice (shown if attending) -->
+          <div class="field-group hidden" id="meal-section">
+            <p class="field-label">Your Meal Selection</p>
+            <div class="radio-row">
+              <label class="radio-card meal-card">
+                <input type="radio" name="meal" value="short_rib" />
+                <span class="meal-icon">🥩</span>
+                <span class="radio-label">Braised Short Rib</span>
+              </label>
+              <label class="radio-card meal-card">
+                <input type="radio" name="meal" value="chicken" />
+                <span class="meal-icon">🍗</span>
+                <span class="radio-label">Herb Roasted Chicken</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Plus one section (shown if has_plus_one & attending) -->
+          <div class="field-group hidden" id="plus-one-section">
+            <p class="field-label">Will you be bringing a guest?</p>
+            <div class="radio-row">
+              <label class="radio-card">
+                <input type="radio" name="plus_one" value="yes" />
+                <span class="radio-label">Yes, bringing a guest</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="plus_one" value="no" />
+                <span class="radio-label">No, just me</span>
+              </label>
+            </div>
+
+            <!-- Plus one details (shown if bringing plus one) -->
+            <div class="hidden" id="plus-one-details">
+              <div class="field-group">
+                <label class="field-label" for="plus-one-name">Guest's Full Name</label>
+                <input type="text" id="plus-one-name" class="text-input" placeholder="Enter their full name" />
+              </div>
+              <div class="field-group">
+                <p class="field-label">Guest's Meal Selection</p>
+                <div class="radio-row">
+                  <label class="radio-card meal-card">
+                    <input type="radio" name="plus_one_meal" value="short_rib" />
+                    <span class="meal-icon">🥩</span>
+                    <span class="radio-label">Braised Short Rib</span>
+                  </label>
+                  <label class="radio-card meal-card">
+                    <input type="radio" name="plus_one_meal" value="chicken" />
+                    <span class="meal-icon">🍗</span>
+                    <span class="radio-label">Herb Roasted Chicken</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="form-error" class="error-message hidden"></div>
+
+          <div class="form-actions">
+            <button class="btn-ghost" id="btn-back">Back</button>
+            <button class="btn-primary" id="btn-submit">Submit RSVP</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Confirmation -->
+        <div class="rsvp-step hidden" id="step-confirm">
+          <div class="confirm-icon">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="30" cy="30" r="29" stroke="currentColor" stroke-width="2"/>
+              <path d="M18 30l9 9 15-15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="confirm-title">Thank you!</h3>
+          <p class="confirm-message" id="confirm-message"></p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- VENUE -->
+  <section id="venue">
+    <div class="venue-hero">
+      <div class="venue-hero-overlay"></div>
+      <div class="venue-hero-content">
+        <p class="section-eyebrow light">The Venue</p>
+        <h2 class="venue-title">Royal Palms Resort &amp; Spa</h2>
+        <p class="venue-subtitle">5200 E. Camelback Road &nbsp;·&nbsp; Phoenix, Arizona 85018</p>
+      </div>
+    </div>
+
+    <div class="container venue-body">
+
+      <div class="venue-description">
+        <p>
+          Nestled at the foot of Camelback Mountain, the Royal Palms Resort &amp; Spa is one of
+          the American Southwest's most beloved romantic destinations. Originally built in 1929 as
+          the private winter estate of New York financier Delos Willard Cooke, the property was
+          modeled after a Spanish Colonial villa and has never lost its timeless Mediterranean
+          character.
+        </p>
+        <p>
+          Towering royal palms, fragrant citrus groves, cascading bougainvillea, and intimate
+          garden courtyards create a lush, secluded atmosphere worlds away from the Arizona desert
+          surrounding it. Hand-painted tiles, wrought-iron details, terracotta rooftops, and arched
+          colonnades lend every moment an effortlessly old-world elegance — the perfect backdrop for
+          a celebration of love.
+        </p>
+      </div>
+
+      <div class="venue-features">
+
+        <div class="venue-card">
+          <div class="venue-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 4C15.163 4 8 11.163 8 20c0 12 16 28 16 28s16-16 16-28c0-8.837-7.163-16-16-16z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+              <circle cx="24" cy="20" r="5" stroke="currentColor" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <h3>Location</h3>
+          <p>5200 E. Camelback Road<br/>Phoenix, AZ 85018</p>
+          <a class="venue-link" href="https://maps.google.com/?q=Royal+Palms+Resort+and+Spa+Phoenix+AZ" target="_blank" rel="noopener">Get Directions →</a>
+        </div>
+
+        <div class="venue-card">
+          <div class="venue-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 36V16c0-2.21 1.79-4 4-4h24c2.21 0 4 1.79 4 4v20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M4 36h40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M20 36V28h8v8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 22h4M28 22h4M16 28h4M28 28h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Garden Courtyards</h3>
+          <p>Intimate outdoor ceremony and reception spaces amid lush bougainvillea, palms, and the glow of Camelback Mountain.</p>
+        </div>
+
+        <div class="venue-card">
+          <div class="venue-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 38h32M12 38V20M36 38V20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M6 20h36" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M24 10L6 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M24 10l18 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="24" cy="10" r="2.5" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3>T. Cook's Restaurant</h3>
+          <p>One of Phoenix's most acclaimed dining destinations, featuring Mediterranean-inspired cuisine crafted from local Arizona ingredients.</p>
+        </div>
+
+        <div class="venue-card">
+          <div class="venue-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="8" y="14" width="32" height="26" rx="2" stroke="currentColor" stroke-width="2.5"/>
+              <path d="M16 14V10a8 8 0 0116 0v4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="24" cy="28" r="4" stroke="currentColor" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <h3>Alvadora Spa</h3>
+          <p>A full-service luxury spa offering Mediterranean wellness treatments — perfect for pre-wedding relaxation and rejuvenation.</p>
+        </div>
+
+        <div class="venue-card">
+          <div class="venue-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 32c0-8.837 7.163-16 16-16s16 7.163 16 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M4 32h40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M24 16V10M18 14l6-4 6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Casita Suites</h3>
+          <p>119 elegantly appointed guest rooms and private casitas with fireplaces, garden patios, and views of Camelback Mountain.</p>
+        </div>
+
+        <div class="venue-card">
+          <div class="venue-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 8l4.24 8.59 9.48 1.38-6.86 6.69 1.62 9.43L24 29.5l-8.48 4.46 1.62-9.43-6.86-6.69 9.48-1.38L24 8z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Wedding Planning</h3>
+          <p>A dedicated on-site wedding coordinator, award-winning catering, and a full vendor network to bring your vision to life.</p>
+        </div>
+
+      </div>
+
+      <div class="venue-photo-grid">
+        <div class="photo-large venue-photo" id="photo-1">
+          <div class="photo-caption">El Jardín Courtyard</div>
+        </div>
+        <div class="photo-small venue-photo" id="photo-2">
+          <div class="photo-caption">Spanish Colonial Architecture</div>
+        </div>
+        <div class="photo-small venue-photo" id="photo-3">
+          <div class="photo-caption">Camelback Mountain Views</div>
+        </div>
+        <div class="photo-medium venue-photo" id="photo-4">
+          <div class="photo-caption">T. Cook's Restaurant</div>
+        </div>
+        <div class="photo-medium venue-photo" id="photo-5">
+          <div class="photo-caption">Alvadora Spa</div>
+        </div>
+      </div>
+
+      <div class="venue-cta">
+        <p>Overnight accommodations available for wedding guests</p>
+        <a class="btn-outline" href="https://www.hyatt.com/unbound-collection/en-US/phxub-royal-palms-resort-and-spa" target="_blank" rel="noopener">Explore the Resort</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <div class="container footer-inner">
+      <p class="footer-names">Mark &amp; Ari</p>
+      <p class="footer-date">October 17, 2026 &nbsp;·&nbsp; Phoenix, Arizona</p>
+      <p class="footer-love">Made with love &hearts;</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

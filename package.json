@@ -1,0 +1,15 @@
+{
+  "name": "wedding-website-mark-ari",
+  "version": "1.0.0",
+  "description": "Wedding RSVP website for Mark & Ari",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node database/seed.js",
+    "dev": "node database/seed.js && node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "express": "^4.18.2"
+  }
+}
