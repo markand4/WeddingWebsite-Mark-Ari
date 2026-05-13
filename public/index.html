@@ -16,6 +16,7 @@
     <div class="nav-inner">
       <span class="nav-brand">M &amp; A</span>
       <ul class="nav-links">
+        <li><a href="#gallery">Our Story</a></li>
         <li><a href="#rsvp">RSVP</a></li>
         <li><a href="#venue">The Venue</a></li>
       </ul>
@@ -23,7 +24,7 @@
   </nav>
 
   <!-- HERO -->
-  <section id="hero">
+  <section id="hero" style="background-image:url('/images/hero.jpg')">
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <p class="hero-eyebrow">We're getting married</p>
@@ -47,6 +48,55 @@
       <div class="countdown-item"><span id="cd-seconds">--</span><label>Seconds</label></div>
     </div>
   </section>
+
+  <!-- OUR STORY / GALLERY -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">From Paris to Phoenix</p>
+        <h2 class="section-title">Our Story</h2>
+        <div class="title-divider"></div>
+      </div>
+      <div class="gallery-masonry">
+        <!-- Paris -->
+        <div class="gallery-item" data-index="0"><img src="/images/photo-01.jpg" alt="Mark and Ari at the Eiffel Tower" loading="lazy" /></div>
+        <div class="gallery-item" data-index="1"><img src="/images/photo-02.jpg" alt="Mark and Ari on the Seine" loading="lazy" /></div>
+        <!-- Engagement – saguaro series -->
+        <div class="gallery-item" data-index="2"><img src="/images/photo-03.jpg" alt="Engagement in Arizona" loading="lazy" /></div>
+        <div class="gallery-item" data-index="3"><img src="/images/photo-04.jpg" alt="Sunset kiss in Arizona" loading="lazy" /></div>
+        <div class="gallery-item" data-index="4"><img src="/images/photo-05.jpg" alt="The ring" loading="lazy" /></div>
+        <!-- Engagement – prickly pear series -->
+        <div class="gallery-item" data-index="5"><img src="/images/photo-06.jpg" alt="Mark and Ari in the garden" loading="lazy" /></div>
+        <div class="gallery-item" data-index="6"><img src="/images/photo-07.jpg" alt="Mark and Ari together" loading="lazy" /></div>
+        <div class="gallery-item" data-index="7"><img src="/images/photo-08.jpg" alt="Golden hour together" loading="lazy" /></div>
+        <div class="gallery-item" data-index="8"><img src="/images/photo-09.jpg" alt="A kiss in golden light" loading="lazy" /></div>
+        <div class="gallery-item" data-index="9"><img src="/images/photo-10.jpg" alt="Laughing together" loading="lazy" /></div>
+        <!-- Engagement – sunset forehead series -->
+        <div class="gallery-item" data-index="10"><img src="/images/photo-11.jpg" alt="Forehead to forehead" loading="lazy" /></div>
+        <div class="gallery-item" data-index="11"><img src="/images/photo-12.jpg" alt="Sunburst moment" loading="lazy" /></div>
+        <div class="gallery-item" data-index="12"><img src="/images/photo-13.jpg" alt="Reaching hands and the ring" loading="lazy" /></div>
+        <div class="gallery-item" data-index="13"><img src="/images/photo-14.jpg" alt="Almost a kiss" loading="lazy" /></div>
+        <div class="gallery-item" data-index="14"><img src="/images/photo-15.jpg" alt="A spinning kiss" loading="lazy" /></div>
+        <!-- Engagement – playful series -->
+        <div class="gallery-item" data-index="15"><img src="/images/photo-16.jpg" alt="Piggyback smiles" loading="lazy" /></div>
+        <div class="gallery-item" data-index="16"><img src="/images/photo-17.jpg" alt="Piggyback kiss" loading="lazy" /></div>
+        <div class="gallery-item" data-index="17"><img src="/images/photo-18.jpg" alt="Mark and Ari" loading="lazy" /></div>
+        <div class="gallery-item" data-index="18"><img src="/images/photo-19.jpg" alt="Swirling kiss" loading="lazy" /></div>
+        <div class="gallery-item" data-index="19"><img src="/images/photo-20.jpg" alt="A quiet moment" loading="lazy" /></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIGHTBOX -->
+  <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true">
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
+    <button class="lb-prev" id="lb-prev" aria-label="Previous">&#8592;</button>
+    <div class="lb-img-wrap">
+      <img id="lb-img" src="" alt="Photo" />
+    </div>
+    <button class="lb-next" id="lb-next" aria-label="Next">&#8594;</button>
+    <p class="lb-counter" id="lb-counter"></p>
+  </div>
 
   <!-- RSVP -->
   <section id="rsvp">
