@@ -140,58 +140,76 @@
             </div>
           </fieldset>
 
-          <!-- Meal choice (shown if attending) -->
-          <div class="field-group hidden" id="meal-section">
-            <p class="field-label">Your Meal Selection</p>
+          <!-- Person 1 meal + dietary (always shown when attending) -->
+          <div class="hidden" id="person1-section">
+            <div class="person-header hidden" id="person1-header">
+              <span class="person-badge">&#10022;</span>
+              <span class="person-name-label" id="person1-label"></span>
+            </div>
+            <p class="field-label">Meal Selection</p>
             <div class="radio-row">
               <label class="radio-card meal-card">
-                <input type="radio" name="meal" value="short_rib" />
+                <input type="radio" name="meal1" value="short_rib" />
                 <span class="meal-icon">🥩</span>
                 <span class="radio-label">Braised Short Rib</span>
               </label>
               <label class="radio-card meal-card">
-                <input type="radio" name="meal" value="chicken" />
+                <input type="radio" name="meal1" value="chicken" />
                 <span class="meal-icon">🍗</span>
                 <span class="radio-label">Herb Roasted Chicken</span>
               </label>
             </div>
+            <div class="dietary-group">
+              <label class="field-label" for="dietary1">Dietary Restrictions</label>
+              <textarea id="dietary1" class="text-input textarea-input" placeholder="e.g. gluten-free, nut allergy, vegetarian… leave blank if none"></textarea>
+            </div>
           </div>
 
-          <!-- Plus one section (shown if has_plus_one & attending) -->
-          <div class="field-group hidden" id="plus-one-section">
-            <p class="field-label">Will you be bringing a guest?</p>
+          <!-- Plus one question — Y type only -->
+          <div class="hidden" id="plus-one-question">
+            <fieldset class="field-group">
+              <legend class="field-label">Will you be bringing a plus one?</legend>
+              <div class="radio-row">
+                <label class="radio-card">
+                  <input type="radio" name="bring_plus_one" value="yes" />
+                  <span class="radio-label">Yes, bringing a guest</span>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="bring_plus_one" value="no" />
+                  <span class="radio-label">No, just me</span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <!-- Person 2 section — couples always, Y type only if bringing plus one -->
+          <div class="hidden" id="person2-section">
+            <div class="person2-divider"></div>
+            <!-- Name input for Y type -->
+            <div class="hidden" id="person2-name-input-wrap">
+              <label class="field-label" for="person2-name-input">Guest's Full Name</label>
+              <input type="text" id="person2-name-input" class="text-input" placeholder="Enter their full name" />
+            </div>
+            <div class="person-header" id="person2-header">
+              <span class="person-badge">&#10022;</span>
+              <span class="person-name-label" id="person2-label">Plus One</span>
+            </div>
+            <p class="field-label">Meal Selection</p>
             <div class="radio-row">
-              <label class="radio-card">
-                <input type="radio" name="plus_one" value="yes" />
-                <span class="radio-label">Yes, bringing a guest</span>
+              <label class="radio-card meal-card">
+                <input type="radio" name="meal2" value="short_rib" />
+                <span class="meal-icon">🥩</span>
+                <span class="radio-label">Braised Short Rib</span>
               </label>
-              <label class="radio-card">
-                <input type="radio" name="plus_one" value="no" />
-                <span class="radio-label">No, just me</span>
+              <label class="radio-card meal-card">
+                <input type="radio" name="meal2" value="chicken" />
+                <span class="meal-icon">🍗</span>
+                <span class="radio-label">Herb Roasted Chicken</span>
               </label>
             </div>
-
-            <!-- Plus one details (shown if bringing plus one) -->
-            <div class="hidden" id="plus-one-details">
-              <div class="field-group">
-                <label class="field-label" for="plus-one-name">Guest's Full Name</label>
-                <input type="text" id="plus-one-name" class="text-input" placeholder="Enter their full name" />
-              </div>
-              <div class="field-group">
-                <p class="field-label">Guest's Meal Selection</p>
-                <div class="radio-row">
-                  <label class="radio-card meal-card">
-                    <input type="radio" name="plus_one_meal" value="short_rib" />
-                    <span class="meal-icon">🥩</span>
-                    <span class="radio-label">Braised Short Rib</span>
-                  </label>
-                  <label class="radio-card meal-card">
-                    <input type="radio" name="plus_one_meal" value="chicken" />
-                    <span class="meal-icon">🍗</span>
-                    <span class="radio-label">Herb Roasted Chicken</span>
-                  </label>
-                </div>
-              </div>
+            <div class="dietary-group">
+              <label class="field-label" for="dietary2">Dietary Restrictions</label>
+              <textarea id="dietary2" class="text-input textarea-input" placeholder="e.g. gluten-free, nut allergy, vegetarian… leave blank if none"></textarea>
             </div>
           </div>
 

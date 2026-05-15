@@ -30,28 +30,63 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
 
 /* ===== RSVP FLOW ===== */
-let currentGuestId = null;
-let guestHasPlusOne = false;
+let currentGuestId   = null;
+let currentGuestType = null;
+let currentNames     = { person1: '', person2: '' };
 
-const guestSelect   = document.getElementById('guest-select');
-const btnNext       = document.getElementById('btn-next');
-const btnBack       = document.getElementById('btn-back');
-const btnSubmit     = document.getElementById('btn-submit');
+const guestSelect = document.getElementById('guest-select');
+const btnNext     = document.getElementById('btn-next');
+const btnBack     = document.getElementById('btn-back');
+const btnSubmit   = document.getElementById('btn-submit');
+const formError   = document.getElementById('form-error');
 
-const stepSelect    = document.getElementById('step-select');
-const stepForm      = document.getElementById('step-form');
-const stepConfirm   = document.getElementById('step-confirm');
+const stepSelect  = document.getElementById('step-select');
+const stepForm    = document.getElementById('step-form');
+const stepConfirm = document.getElementById('step-confirm');
 
-const mealSection   = document.getElementById('meal-section');
-const plusOneSection = document.getElementById('plus-one-section');
-const plusOneDetails = document.getElementById('plus-one-details');
-const formError     = document.getElementById('form-error');
+const person1Section       = document.getElementById('person1-section');
+const person1Header        = document.getElementById('person1-header');
+const plusOneQuestion      = document.getElementById('plus-one-question');
+const person2Section       = document.getElementById('person2-section');
+const person2NameInputWrap = document.getElementById('person2-name-input-wrap');
+
+/* Parse "Joe & Stenia Kurpiel" → { person1: "Joe Kurpiel", person2: "Stenia Kurpiel" } */
+function parseCoupleName(name) {
+  const t = name.trim();
+
+  // "Godinez Family (Fermin/Margaret/kids)"
+  if (t.includes('(') && t.includes('/')) {
+    const m = t.match(/\(([^/]+)\/([^/\)]+)/);
+    if (m) {
+      const ln = t.split(' ')[0];
+      return { person1: `${m[1].trim()} ${ln}`, person2: `${m[2].trim()} ${ln}` };
+    }
+  }
+
+  if (!t.includes(' & ')) return { person1: t, person2: 'Guest 2' };
+
+  const [left, right] = t.split(' & ');
+  const lw = left.trim().split(' ');
+  const rw = right.trim().split(' ');
+
+  if (lw.length === 1 && rw.length === 1) {
+    // "Fran & Rudy" — first names only
+    return { person1: left.trim(), person2: right.trim() };
+  }
+  if (lw.length === 1 && rw.length >= 2) {
+    // "Joe & Stenia Kurpiel" — shared last name in right part
+    const ln = rw[rw.length - 1];
+    const fn2 = rw.slice(0, -1).join(' ');
+    return { person1: `${left.trim()} ${ln}`, person2: `${fn2} ${ln}` };
+  }
+  // "Ewa Rutkowska & John Kurpiel" — both have last names
+  return { person1: left.trim(), person2: right.trim() };
+}
 
 async function loadGuests() {
   try {
     const res = await fetch('/api/guests');
     const guests = await res.json();
-
     guestSelect.innerHTML = '<option value="">— Select your name —</option>';
     guests.forEach(g => {
       const opt = document.createElement('option');
@@ -59,8 +94,7 @@ async function loadGuests() {
       opt.textContent = g.name;
       guestSelect.appendChild(opt);
     });
-
-    if (guests.length === 0) {
+    if (!guests.length) {
       const opt = document.createElement('option');
       opt.disabled = true;
       opt.textContent = 'All guests have RSVPed!';
@@ -78,85 +112,123 @@ guestSelect.addEventListener('change', () => {
 btnNext.addEventListener('click', async () => {
   const id = guestSelect.value;
   if (!id) return;
-
   try {
     const res = await fetch(`/api/guest/${id}`);
     if (!res.ok) {
       const data = await res.json();
-      showError(data.error || 'Something went wrong. Please try again.');
-      loadGuests();
-      guestSelect.value = '';
-      btnNext.disabled = true;
+      showError(data.error || 'Something went wrong.');
+      loadGuests(); guestSelect.value = ''; btnNext.disabled = true;
       return;
     }
     const guest = await res.json();
-    currentGuestId = guest.id;
-    guestHasPlusOne = guest.has_plus_one;
+    currentGuestId   = guest.id;
+    currentGuestType = guest.type;
+    currentNames     = guest.type === 'C'
+      ? parseCoupleName(guest.name)
+      : { person1: guest.name, person2: '' };
 
     document.getElementById('guest-name-display').textContent = guest.name;
     resetForm();
-
     showStep(stepForm);
   } catch {
     showError('Unable to load guest details. Please try again.');
   }
 });
 
-btnBack.addEventListener('click', () => {
-  showStep(stepSelect);
-  resetForm();
-});
+btnBack.addEventListener('click', () => { showStep(stepSelect); resetForm(); });
 
-/* Attending radios */
-document.querySelectorAll('input[name="attending"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    const attending = radio.value === 'yes';
-    mealSection.classList.toggle('hidden', !attending);
-    plusOneSection.classList.toggle('hidden', !attending || !guestHasPlusOne);
-    plusOneDetails.classList.add('hidden');
-    document.querySelectorAll('input[name="plus_one"]').forEach(r => r.checked = false);
+/* Attending toggle */
+document.querySelectorAll('input[name="attending"]').forEach(r => {
+  r.addEventListener('change', () => {
     hideError();
+    const attending = r.value === 'yes';
+
+    person1Section.classList.toggle('hidden', !attending);
+
+    if (attending) {
+      // Show person 1 name label only for couples
+      person1Header.classList.toggle('hidden', currentGuestType !== 'C');
+      document.getElementById('person1-label').textContent = currentNames.person1;
+
+      if (currentGuestType === 'C') {
+        // Couples: always show person 2 immediately
+        plusOneQuestion.classList.add('hidden');
+        person2Section.classList.remove('hidden');
+        person2NameInputWrap.classList.add('hidden');
+        document.getElementById('person2-label').textContent = currentNames.person2;
+      } else if (currentGuestType === 'Y') {
+        plusOneQuestion.classList.remove('hidden');
+        person2Section.classList.add('hidden');
+      }
+      // N type: nothing extra
+    } else {
+      person1Header.classList.add('hidden');
+      plusOneQuestion.classList.add('hidden');
+      person2Section.classList.add('hidden');
+      document.querySelectorAll('input[name="bring_plus_one"]').forEach(x => x.checked = false);
+    }
   });
 });
 
-/* Plus one radios */
-document.querySelectorAll('input[name="plus_one"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    plusOneDetails.classList.toggle('hidden', radio.value !== 'yes');
+/* Plus one question (Y type) */
+document.querySelectorAll('input[name="bring_plus_one"]').forEach(r => {
+  r.addEventListener('change', () => {
     hideError();
+    if (r.value === 'yes') {
+      person2Section.classList.remove('hidden');
+      person2NameInputWrap.classList.remove('hidden');
+      document.getElementById('person2-label').textContent = 'Plus One';
+    } else {
+      person2Section.classList.add('hidden');
+      document.getElementById('person2-name-input').value = '';
+      document.querySelectorAll('input[name="meal2"]').forEach(x => x.checked = false);
+      document.getElementById('dietary2').value = '';
+    }
   });
+});
+
+/* Live-update person 2 label as name is typed (Y type) */
+document.getElementById('person2-name-input').addEventListener('input', e => {
+  document.getElementById('person2-label').textContent = e.target.value.trim() || 'Plus One';
 });
 
 btnSubmit.addEventListener('click', async () => {
   hideError();
 
-  const attendingRadio = document.querySelector('input[name="attending"]:checked');
-  if (!attendingRadio) { showError('Please indicate whether you will be attending.'); return; }
+  const attendingEl = document.querySelector('input[name="attending"]:checked');
+  if (!attendingEl) { showError('Please indicate whether you will be attending.'); return; }
+  const attending = attendingEl.value === 'yes';
 
-  const attending = attendingRadio.value === 'yes';
-
-  let meal_choice = null;
-  let bring_plus_one = false;
-  let plus_one_name = null;
-  let plus_one_meal = null;
+  let meal1 = null, dietary1 = null;
+  let bring_plus_one = false, person2_name = null, meal2 = null, dietary2 = null;
 
   if (attending) {
-    const mealRadio = document.querySelector('input[name="meal"]:checked');
-    if (!mealRadio) { showError('Please select your meal choice.'); return; }
-    meal_choice = mealRadio.value;
+    const m1 = document.querySelector('input[name="meal1"]:checked');
+    if (!m1) { showError('Please select your meal choice.'); return; }
+    meal1    = m1.value;
+    dietary1 = document.getElementById('dietary1').value.trim() || null;
 
-    if (guestHasPlusOne) {
-      const plusOneRadio = document.querySelector('input[name="plus_one"]:checked');
-      if (!plusOneRadio) { showError('Please indicate whether you will be bringing a guest.'); return; }
-      bring_plus_one = plusOneRadio.value === 'yes';
+    if (currentGuestType === 'C') {
+      const m2 = document.querySelector('input[name="meal2"]:checked');
+      if (!m2) { showError(`Please select a meal for ${currentNames.person2}.`); return; }
+      meal2         = m2.value;
+      dietary2      = document.getElementById('dietary2').value.trim() || null;
+      person2_name  = currentNames.person2;
+      bring_plus_one = true;
+    }
+
+    if (currentGuestType === 'Y') {
+      const poEl = document.querySelector('input[name="bring_plus_one"]:checked');
+      if (!poEl) { showError('Please indicate whether you will be bringing a plus one.'); return; }
+      bring_plus_one = poEl.value === 'yes';
 
       if (bring_plus_one) {
-        plus_one_name = document.getElementById('plus-one-name').value.trim();
-        if (!plus_one_name) { showError("Please enter your guest's name."); return; }
-
-        const pMeal = document.querySelector('input[name="plus_one_meal"]:checked');
-        if (!pMeal) { showError("Please select a meal for your guest."); return; }
-        plus_one_meal = pMeal.value;
+        person2_name = document.getElementById('person2-name-input').value.trim();
+        if (!person2_name) { showError("Please enter your plus one's name."); return; }
+        const m2 = document.querySelector('input[name="meal2"]:checked');
+        if (!m2) { showError("Please select a meal for your plus one."); return; }
+        meal2    = m2.value;
+        dietary2 = document.getElementById('dietary2').value.trim() || null;
       }
     }
   }
@@ -168,35 +240,23 @@ btnSubmit.addEventListener('click', async () => {
     const res = await fetch('/api/rsvp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        guest_id: currentGuestId,
-        attending,
-        meal_choice,
-        bring_plus_one,
-        plus_one_name,
-        plus_one_meal,
-      }),
+      body: JSON.stringify({ guest_id: currentGuestId, attending, meal1, dietary1, bring_plus_one, person2_name, meal2, dietary2 }),
     });
-
     const data = await res.json();
     if (!res.ok) {
       showError(data.error || 'Something went wrong. Please try again.');
-      btnSubmit.disabled = false;
-      btnSubmit.textContent = 'Submit RSVP';
+      btnSubmit.disabled = false; btnSubmit.textContent = 'Submit RSVP';
       return;
     }
-
-    const confirmMsg = attending
-      ? `We can't wait to celebrate with you, ${data.name}! Your RSVP has been received and we look forward to seeing you on October 17th at the Royal Palms Resort & Spa.`
-      : `Thank you for letting us know, ${data.name}. We'll miss you and hope to celebrate with you another time!`;
-
-    document.getElementById('confirm-message').textContent = confirmMsg;
+    const msg = attending
+      ? `We can't wait to celebrate with you! Your RSVP has been received — see you October 17th at Royal Palms Resort & Spa.`
+      : `Thank you for letting us know, ${data.name}. We'll miss you and hope to celebrate together another time!`;
+    document.getElementById('confirm-message').textContent = msg;
     showStep(stepConfirm);
     loadGuests();
   } catch {
     showError('Network error. Please check your connection and try again.');
-    btnSubmit.disabled = false;
-    btnSubmit.textContent = 'Submit RSVP';
+    btnSubmit.disabled = false; btnSubmit.textContent = 'Submit RSVP';
   }
 });
 
@@ -206,12 +266,18 @@ function showStep(step) {
 }
 
 function resetForm() {
-  document.querySelectorAll('input[name="attending"], input[name="meal"], input[name="plus_one"], input[name="plus_one_meal"]')
+  document.querySelectorAll('input[name="attending"], input[name="meal1"], input[name="meal2"], input[name="bring_plus_one"]')
     .forEach(r => r.checked = false);
-  document.getElementById('plus-one-name').value = '';
-  mealSection.classList.add('hidden');
-  plusOneSection.classList.add('hidden');
-  plusOneDetails.classList.add('hidden');
+  document.getElementById('person2-name-input').value = '';
+  document.getElementById('dietary1').value = '';
+  document.getElementById('dietary2').value = '';
+  document.getElementById('person1-label').textContent = '';
+  document.getElementById('person2-label').textContent = 'Plus One';
+  person1Section.classList.add('hidden');
+  person1Header.classList.add('hidden');
+  plusOneQuestion.classList.add('hidden');
+  person2Section.classList.add('hidden');
+  person2NameInputWrap.classList.add('hidden');
   hideError();
   btnSubmit.disabled = false;
   btnSubmit.textContent = 'Submit RSVP';
@@ -223,9 +289,7 @@ function showError(msg) {
   formError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function hideError() {
-  formError.classList.add('hidden');
-}
+function hideError() { formError.classList.add('hidden'); }
 
 /* ===== INIT ===== */
 loadGuests();

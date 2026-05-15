@@ -20,17 +20,24 @@ const pool = new Pool(
 async function initSchema() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS guests (
-      id            SERIAL PRIMARY KEY,
-      name          TEXT    NOT NULL,
-      has_plus_one  INTEGER NOT NULL DEFAULT 0,
-      rsvp_submitted INTEGER NOT NULL DEFAULT 0,
-      attending     INTEGER,
-      meal_choice   TEXT,
-      bring_plus_one INTEGER,
-      plus_one_name TEXT,
-      plus_one_meal TEXT
+      id               SERIAL PRIMARY KEY,
+      name             TEXT    NOT NULL,
+      type             TEXT    NOT NULL CHECK (type IN ('Y', 'N', 'C')),
+      rsvp_submitted   INTEGER NOT NULL DEFAULT 0,
+      attending        INTEGER,
+      person1_meal     TEXT,
+      person1_dietary  TEXT,
+      bring_plus_one   INTEGER,
+      person2_name     TEXT,
+      person2_meal     TEXT,
+      person2_dietary  TEXT
     )
   `);
 }
 
-module.exports = { pool, initSchema };
+async function resetSchema() {
+  await pool.query('DROP TABLE IF EXISTS guests');
+  await initSchema();
+}
+
+module.exports = { pool, initSchema, resetSchema };
