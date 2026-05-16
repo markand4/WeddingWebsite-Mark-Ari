@@ -9,8 +9,6 @@ param(
     [string]$AdminPass = "admin"
 )
 
-$ErrorActionPreference = "Stop"
-
 $Service = "wedding-website"
 $Repo    = "wedding"
 $SqlInst = "wedding-db"
@@ -37,33 +35,43 @@ function Write-TempFile([string]$content) {
     return $tmp
 }
 
+# Run a gcloud command, return its stdout, ignore stderr (informational noise)
+function Invoke-Gcloud {
+    $result = & gcloud @args 2>&1 | Where-Object { $_ -is [string] }
+    return $result
+}
+
+function Assert-LastOk([string]$msg) {
+    if ($LASTEXITCODE -ne 0) { throw $msg }
+}
+
 # ---------------------------------------------------------------------------
 # 1. Enable APIs
 # ---------------------------------------------------------------------------
 Write-Host "==> 1. Enabling GCP APIs..." -ForegroundColor Yellow
-gcloud services enable `
+& gcloud services enable `
     run.googleapis.com `
     sqladmin.googleapis.com `
     artifactregistry.googleapis.com `
     cloudbuild.googleapis.com `
     secretmanager.googleapis.com `
     --project=$ProjectId
-if ($LASTEXITCODE -ne 0) { throw "Failed to enable APIs" }
+Assert-LastOk "Failed to enable APIs"
 
 # ---------------------------------------------------------------------------
 # 2. Artifact Registry
 # ---------------------------------------------------------------------------
 Write-Host ""
 Write-Host "==> 2. Creating Artifact Registry repo..." -ForegroundColor Yellow
-$repoExists = gcloud artifacts repositories list `
+$repoList = Invoke-Gcloud artifacts repositories list `
     --location=$Region --project=$ProjectId `
-    --filter="name:$Repo" --format="value(name)" 2>$null
-if (-not $repoExists) {
-    gcloud artifacts repositories create $Repo `
+    --filter="name:$Repo" --format="value(name)"
+if (-not ($repoList -match $Repo)) {
+    & gcloud artifacts repositories create $Repo `
         --repository-format=docker `
         --location=$Region `
         --project=$ProjectId
-    if ($LASTEXITCODE -ne 0) { throw "Failed to create Artifact Registry repo" }
+    Assert-LastOk "Failed to create Artifact Registry repo"
 } else {
     Write-Host "   Repo already exists, skipping."
 }
@@ -73,49 +81,50 @@ if (-not $repoExists) {
 # ---------------------------------------------------------------------------
 Write-Host ""
 Write-Host "==> 3. Creating Cloud SQL instance (this takes ~5 minutes)..." -ForegroundColor Yellow
-$sqlExists = gcloud sql instances list `
-    --project=$ProjectId --filter="name=$SqlInst" --format="value(name)" 2>$null
-if (-not $sqlExists) {
-    gcloud sql instances create $SqlInst `
+$sqlList = Invoke-Gcloud sql instances list `
+    --project=$ProjectId --filter="name=$SqlInst" --format="value(name)"
+if (-not ($sqlList -match $SqlInst)) {
+    & gcloud sql instances create $SqlInst `
         --database-version=POSTGRES_15 `
         --tier=db-f1-micro `
         --region=$Region `
         --project=$ProjectId
-    if ($LASTEXITCODE -ne 0) { throw "Failed to create Cloud SQL instance" }
+    Assert-LastOk "Failed to create Cloud SQL instance"
 } else {
     Write-Host "   SQL instance already exists, skipping."
 }
 
 Write-Host ""
 Write-Host "==> 3b. Creating database..." -ForegroundColor Yellow
-$dbExists = gcloud sql databases list `
+$dbList = Invoke-Gcloud sql databases list `
     --instance=$SqlInst --project=$ProjectId `
-    --filter="name=$DbName" --format="value(name)" 2>$null
-if (-not $dbExists) {
-    gcloud sql databases create $DbName `
+    --filter="name=$DbName" --format="value(name)"
+if (-not ($dbList -match $DbName)) {
+    & gcloud sql databases create $DbName `
         --instance=$SqlInst --project=$ProjectId
-    if ($LASTEXITCODE -ne 0) { throw "Failed to create database" }
+    Assert-LastOk "Failed to create database"
 } else {
     Write-Host "   Database already exists, skipping."
 }
 
 Write-Host ""
 Write-Host "==> 3c. Creating DB user..." -ForegroundColor Yellow
-$DbPass = New-RandomBase64 24
-$userExists = gcloud sql users list `
+$DbPass   = New-RandomBase64 24
+$userList = Invoke-Gcloud sql users list `
     --instance=$SqlInst --project=$ProjectId `
-    --filter="name=$DbUser" --format="value(name)" 2>$null
-if (-not $userExists) {
-    gcloud sql users create $DbUser `
+    --filter="name=$DbUser" --format="value(name)"
+if (-not ($userList -match $DbUser)) {
+    & gcloud sql users create $DbUser `
         --instance=$SqlInst `
         --password=$DbPass `
         --project=$ProjectId
-    if ($LASTEXITCODE -ne 0) { throw "Failed to create DB user" }
+    Assert-LastOk "Failed to create DB user"
 } else {
-    gcloud sql users set-password $DbUser `
+    & gcloud sql users set-password $DbUser `
         --instance=$SqlInst `
         --password=$DbPass `
         --project=$ProjectId
+    Assert-LastOk "Failed to update DB user password"
     Write-Host "   User already existed - password updated."
 }
 
@@ -128,13 +137,13 @@ $Conn  = "${ProjectId}:${Region}:${SqlInst}"
 $DbUrl = "postgresql://${DbUser}:${DbPass}@/${DbName}?host=/cloudsql/${Conn}"
 $tmp   = Write-TempFile $DbUrl
 
-$secretExists = gcloud secrets list `
-    --project=$ProjectId --filter="name:wedding-db-url" --format="value(name)" 2>$null
-if (-not $secretExists) {
-    gcloud secrets create wedding-db-url --data-file=$tmp --project=$ProjectId
+$secretList = Invoke-Gcloud secrets list `
+    --project=$ProjectId --filter="name:wedding-db-url" --format="value(name)"
+if (-not ($secretList -match "wedding-db-url")) {
+    & gcloud secrets create wedding-db-url --data-file=$tmp --project=$ProjectId
     if ($LASTEXITCODE -ne 0) { Remove-Item $tmp; throw "Failed to create secret" }
 } else {
-    gcloud secrets versions add wedding-db-url --data-file=$tmp --project=$ProjectId
+    & gcloud secrets versions add wedding-db-url --data-file=$tmp --project=$ProjectId
     if ($LASTEXITCODE -ne 0) { Remove-Item $tmp; throw "Failed to update secret" }
 }
 Remove-Item $tmp
@@ -144,22 +153,23 @@ Remove-Item $tmp
 # ---------------------------------------------------------------------------
 Write-Host ""
 Write-Host "==> 5. Granting Cloud Run service account access to secret..." -ForegroundColor Yellow
-$ProjectNum = gcloud projects describe $ProjectId --format="value(projectNumber)"
+$ProjectNum = (Invoke-Gcloud projects describe $ProjectId --format="value(projectNumber)") | Select-Object -Last 1
 $CrSa       = "${ProjectNum}-compute@developer.gserviceaccount.com"
+Write-Host "   Service account: $CrSa"
 
-gcloud secrets add-iam-policy-binding wedding-db-url `
+& gcloud secrets add-iam-policy-binding wedding-db-url `
     --member="serviceAccount:$CrSa" `
     --role="roles/secretmanager.secretAccessor" `
     --project=$ProjectId
-if ($LASTEXITCODE -ne 0) { throw "Failed to set IAM binding" }
+Assert-LastOk "Failed to set IAM binding"
 
 # ---------------------------------------------------------------------------
 # 6. Build container image
 # ---------------------------------------------------------------------------
 Write-Host ""
 Write-Host "==> 6. Building container image with Cloud Build..." -ForegroundColor Yellow
-gcloud builds submit --tag "${Image}:latest" --project=$ProjectId .
-if ($LASTEXITCODE -ne 0) { throw "Cloud Build failed" }
+& gcloud builds submit --tag "${Image}:latest" --project=$ProjectId .
+Assert-LastOk "Cloud Build failed"
 
 # ---------------------------------------------------------------------------
 # 7. Deploy to Cloud Run
@@ -168,7 +178,7 @@ Write-Host ""
 Write-Host "==> 7. Deploying to Cloud Run..." -ForegroundColor Yellow
 $SessionSecret = New-RandomBase64 32
 
-gcloud run deploy $Service `
+& gcloud run deploy $Service `
     --image="${Image}:latest" `
     --region=$Region `
     --platform=managed `
@@ -182,7 +192,7 @@ gcloud run deploy $Service `
     --add-cloudsql-instances=$Conn `
     --set-env-vars="ADMIN_USER=$AdminUser,ADMIN_PASS=$AdminPass,SESSION_SECRET=$SessionSecret" `
     --project=$ProjectId
-if ($LASTEXITCODE -ne 0) { throw "Cloud Run deploy failed" }
+Assert-LastOk "Cloud Run deploy failed"
 
 # ---------------------------------------------------------------------------
 # 8. Seed the database via Cloud Build
@@ -205,7 +215,7 @@ availableSecrets:
 "@
 
 $tmpYaml = Write-TempFile $seedYaml
-gcloud builds submit --no-source --config=$tmpYaml --project=$ProjectId
+& gcloud builds submit --no-source --config=$tmpYaml --project=$ProjectId
 $seedExit = $LASTEXITCODE
 Remove-Item $tmpYaml
 if ($seedExit -ne 0) {
@@ -215,8 +225,8 @@ if ($seedExit -ne 0) {
 # ---------------------------------------------------------------------------
 # 9. Done
 # ---------------------------------------------------------------------------
-$SiteUrl = gcloud run services describe $Service `
-    --region=$Region --project=$ProjectId --format="value(status.url)"
+$SiteUrl = (Invoke-Gcloud run services describe $Service `
+    --region=$Region --project=$ProjectId --format="value(status.url)") | Select-Object -Last 1
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Green
