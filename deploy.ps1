@@ -1,0 +1,197 @@
+# ---------------------------------------------------------------------------
+# One-time GCP setup + deploy for the Mark & Ari wedding website.
+# Usage: .\deploy.ps1 -ProjectId weddingwebsite-496223
+# ---------------------------------------------------------------------------
+param(
+    [Parameter(Mandatory)][string]$ProjectId,
+    [string]$Region  = "us-central1",
+    [string]$AdminUser = "admin",
+    [string]$AdminPass = "admin"
+)
+
+$ErrorActionPreference = "Stop"
+
+$Service  = "wedding-website"
+$Repo     = "wedding"
+$SqlInst  = "wedding-db"
+$DbName   = "wedding"
+$DbUser   = "wedding_app"
+$Image    = "$Region-docker.pkg.dev/$ProjectId/$Repo/$Service"
+
+Write-Host "`n==> Project: $ProjectId   Region: $Region`n" -ForegroundColor Cyan
+
+# ── Helper ────────────────────────────────────────────────────────────────────
+function New-RandomBase64([int]$bytes) {
+    $buf = New-Object byte[] $bytes
+    [System.Security.Cryptography.RandomNumberGenerator]::Fill($buf)
+    return [Convert]::ToBase64String($buf)
+}
+
+function Write-TempFile([string]$content) {
+    $tmp = [System.IO.Path]::GetTempFileName()
+    [System.IO.File]::WriteAllText($tmp, $content, (New-Object System.Text.UTF8Encoding $false))
+    return $tmp
+}
+
+# ── 1. Enable APIs ────────────────────────────────────────────────────────────
+Write-Host "==> 1. Enabling GCP APIs..." -ForegroundColor Yellow
+gcloud services enable `
+    run.googleapis.com `
+    sqladmin.googleapis.com `
+    artifactregistry.googleapis.com `
+    cloudbuild.googleapis.com `
+    secretmanager.googleapis.com `
+    --project=$ProjectId
+if ($LASTEXITCODE -ne 0) { throw "Failed to enable APIs" }
+
+# ── 2. Artifact Registry ──────────────────────────────────────────────────────
+Write-Host "`n==> 2. Creating Artifact Registry repo..." -ForegroundColor Yellow
+$repoExists = gcloud artifacts repositories list `
+    --location=$Region --project=$ProjectId `
+    --filter="name:$Repo" --format="value(name)" 2>$null
+if (-not $repoExists) {
+    gcloud artifacts repositories create $Repo `
+        --repository-format=docker `
+        --location=$Region `
+        --project=$ProjectId
+    if ($LASTEXITCODE -ne 0) { throw "Failed to create Artifact Registry repo" }
+} else {
+    Write-Host "   Repo already exists, skipping."
+}
+
+# ── 3. Cloud SQL ──────────────────────────────────────────────────────────────
+Write-Host "`n==> 3. Creating Cloud SQL instance (this takes ~5 minutes)..." -ForegroundColor Yellow
+$sqlExists = gcloud sql instances list `
+    --project=$ProjectId --filter="name=$SqlInst" --format="value(name)" 2>$null
+if (-not $sqlExists) {
+    gcloud sql instances create $SqlInst `
+        --database-version=POSTGRES_15 `
+        --tier=db-f1-micro `
+        --region=$Region `
+        --project=$ProjectId
+    if ($LASTEXITCODE -ne 0) { throw "Failed to create Cloud SQL instance" }
+} else {
+    Write-Host "   SQL instance already exists, skipping."
+}
+
+Write-Host "`n==> 3b. Creating database..." -ForegroundColor Yellow
+$dbExists = gcloud sql databases list `
+    --instance=$SqlInst --project=$ProjectId `
+    --filter="name=$DbName" --format="value(name)" 2>$null
+if (-not $dbExists) {
+    gcloud sql databases create $DbName `
+        --instance=$SqlInst --project=$ProjectId
+    if ($LASTEXITCODE -ne 0) { throw "Failed to create database" }
+} else {
+    Write-Host "   Database already exists, skipping."
+}
+
+Write-Host "`n==> 3c. Creating DB user..." -ForegroundColor Yellow
+$DbPass = New-RandomBase64 24
+$userExists = gcloud sql users list `
+    --instance=$SqlInst --project=$ProjectId `
+    --filter="name=$DbUser" --format="value(name)" 2>$null
+if (-not $userExists) {
+    gcloud sql users create $DbUser `
+        --instance=$SqlInst `
+        --password=$DbPass `
+        --project=$ProjectId
+    if ($LASTEXITCODE -ne 0) { throw "Failed to create DB user" }
+} else {
+    # Update password so we have a known value
+    gcloud sql users set-password $DbUser `
+        --instance=$SqlInst `
+        --password=$DbPass `
+        --project=$ProjectId
+    Write-Host "   User already existed — password updated."
+}
+
+# ── 4. Secret Manager ─────────────────────────────────────────────────────────
+Write-Host "`n==> 4. Storing DATABASE_URL in Secret Manager..." -ForegroundColor Yellow
+$Conn   = "${ProjectId}:${Region}:${SqlInst}"
+$DbUrl  = "postgresql://${DbUser}:${DbPass}@/${DbName}?host=/cloudsql/${Conn}"
+$tmp    = Write-TempFile $DbUrl
+
+$secretExists = gcloud secrets list `
+    --project=$ProjectId --filter="name:wedding-db-url" --format="value(name)" 2>$null
+if (-not $secretExists) {
+    gcloud secrets create wedding-db-url --data-file=$tmp --project=$ProjectId
+    if ($LASTEXITCODE -ne 0) { Remove-Item $tmp; throw "Failed to create secret" }
+} else {
+    gcloud secrets versions add wedding-db-url --data-file=$tmp --project=$ProjectId
+    if ($LASTEXITCODE -ne 0) { Remove-Item $tmp; throw "Failed to update secret" }
+}
+Remove-Item $tmp
+
+# ── 5. Grant Cloud Run SA access ──────────────────────────────────────────────
+Write-Host "`n==> 5. Granting Cloud Run service account access to secret..." -ForegroundColor Yellow
+$ProjectNum = gcloud projects describe $ProjectId --format="value(projectNumber)"
+$CrSa       = "${ProjectNum}-compute@developer.gserviceaccount.com"
+
+gcloud secrets add-iam-policy-binding wedding-db-url `
+    --member="serviceAccount:$CrSa" `
+    --role="roles/secretmanager.secretAccessor" `
+    --project=$ProjectId
+if ($LASTEXITCODE -ne 0) { throw "Failed to set IAM binding" }
+
+# ── 6. Build image ────────────────────────────────────────────────────────────
+Write-Host "`n==> 6. Building container image with Cloud Build..." -ForegroundColor Yellow
+gcloud builds submit --tag "${Image}:latest" --project=$ProjectId .
+if ($LASTEXITCODE -ne 0) { throw "Cloud Build failed" }
+
+# ── 7. Deploy to Cloud Run ────────────────────────────────────────────────────
+Write-Host "`n==> 7. Deploying to Cloud Run..." -ForegroundColor Yellow
+$SessionSecret = New-RandomBase64 32
+
+gcloud run deploy $Service `
+    --image="${Image}:latest" `
+    --region=$Region `
+    --platform=managed `
+    --allow-unauthenticated `
+    --port=8080 `
+    --min-instances=0 `
+    --max-instances=5 `
+    --memory=256Mi `
+    --cpu=1 `
+    --set-secrets="DATABASE_URL=wedding-db-url:latest" `
+    --add-cloudsql-instances=$Conn `
+    --set-env-vars="ADMIN_USER=$AdminUser,ADMIN_PASS=$AdminPass,SESSION_SECRET=$SessionSecret" `
+    --project=$ProjectId
+if ($LASTEXITCODE -ne 0) { throw "Cloud Run deploy failed" }
+
+# ── 8. Seed the database ──────────────────────────────────────────────────────
+Write-Host "`n==> 8. Seeding the database..." -ForegroundColor Yellow
+
+$seedYaml = @"
+steps:
+- name: 'node:20-alpine'
+  entrypoint: sh
+  args:
+  - '-c'
+  - 'npm ci --only=production && DATABASE_URL=\$\$DATABASE_URL node database/seed.js'
+  secretEnv: ['DATABASE_URL']
+availableSecrets:
+  secretManager:
+  - versionName: projects/$ProjectId/secrets/wedding-db-url/versions/latest
+    env: DATABASE_URL
+"@
+
+$tmpYaml = Write-TempFile $seedYaml
+gcloud builds submit --no-source --config=$tmpYaml --project=$ProjectId
+$seedExit = $LASTEXITCODE
+Remove-Item $tmpYaml
+if ($seedExit -ne 0) { Write-Warning "Seed step failed — you may need to re-run it manually." }
+
+# ── 9. Print results ──────────────────────────────────────────────────────────
+$SiteUrl = gcloud run services describe $Service `
+    --region=$Region --project=$ProjectId --format="value(status.url)"
+
+Write-Host "`n============================================================" -ForegroundColor Green
+Write-Host " Done!" -ForegroundColor Green
+Write-Host " Site URL : $SiteUrl" -ForegroundColor Green
+Write-Host " Admin    : $SiteUrl/admin  (user: $AdminUser)" -ForegroundColor Green
+Write-Host "============================================================`n" -ForegroundColor Green
+
+Write-Host "Next step — map your custom domain:" -ForegroundColor Cyan
+Write-Host "  gcloud run domain-mappings create --service=$Service --domain=markarikurpiel.com --region=$Region --project=$ProjectId"
+Write-Host "Then add the DNS records it prints to your Squarespace dashboard.`n"
