@@ -9,6 +9,7 @@ param(
     [string]$AdminPass = "admin"
 )
 
+
 $Service = "wedding-website"
 $Repo    = "wedding"
 $SqlInst = "wedding-db"
@@ -25,7 +26,8 @@ Write-Host ""
 # ---------------------------------------------------------------------------
 function New-RandomBase64([int]$bytes) {
     $buf = New-Object byte[] $bytes
-    [System.Security.Cryptography.RandomNumberGenerator]::Fill($buf)
+    $rng = New-Object System.Security.Cryptography.RNGCryptoServiceProvider
+    $rng.GetBytes($buf)
     return [Convert]::ToBase64String($buf)
 }
 
@@ -206,7 +208,7 @@ steps:
   entrypoint: sh
   args:
   - '-c'
-  - 'npm ci --only=production && DATABASE_URL=`$`$DATABASE_URL node database/seed.js'
+  - 'npm install --only=production && DATABASE_URL=`$`$DATABASE_URL node database/seed.js'
   secretEnv: ['DATABASE_URL']
 availableSecrets:
   secretManager:

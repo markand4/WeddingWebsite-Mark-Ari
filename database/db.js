@@ -2,11 +2,16 @@ const { Pool } = require('pg');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Unix socket connections (Cloud SQL via Cloud Run) don't support SSL —
+// the proxy tunnel is already encrypted. Only use SSL for TCP connections.
+const dbUrl = process.env.DATABASE_URL;
+const isUnixSocket = dbUrl && dbUrl.includes('host=/');
+
 const pool = new Pool(
-  process.env.DATABASE_URL
+  dbUrl
     ? {
-        connectionString: process.env.DATABASE_URL,
-        ssl: isProduction ? { rejectUnauthorized: false } : false,
+        connectionString: dbUrl,
+        ssl: (isProduction && !isUnixSocket) ? { rejectUnauthorized: false } : false,
       }
     : {
         user:     process.env.DB_USER     || 'postgres',

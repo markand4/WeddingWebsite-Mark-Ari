@@ -381,9 +381,14 @@ app.get('/admin/export', requireAdmin, async (req, res) => {
 
 /* ===== START ===== */
 async function start() {
-  await initSchema();
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => console.log(`Wedding website running on port ${PORT}`));
+  try {
+    await initSchema();
+    console.log('Database schema ready.');
+  } catch (err) {
+    console.error('DB schema init failed (will retry on first request):', err.message);
+  }
 }
 
-start().catch(err => { console.error('Failed to start:', err); process.exit(1); });
+start();
