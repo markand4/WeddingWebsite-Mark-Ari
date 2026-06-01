@@ -251,11 +251,12 @@ body {
 }
 .pets-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px;
+  max-width: 860px;
+  margin: 0 auto;
 }
-@media (max-width: 900px) { .pets-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 500px) { .pets-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .pets-grid { grid-template-columns: 1fr; } }
 .pet-card { text-align: center; }
 .pet-photo-wrap {
   width: 100%;
