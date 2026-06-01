@@ -1,10 +1,11 @@
-const express = require('express');
-const path    = require('path');
-const session = require('express-session');
-const xlsx    = require('xlsx');
+const express       = require('express');
+const path          = require('path');
+const cookieSession = require('cookie-session');
+const xlsx          = require('xlsx');
 const { pool, initSchema } = require('./database/db');
 
 const app = express();
+app.set('trust proxy', 1); // Cloud Run terminates TLS — read X-Forwarded-Proto
 
 /* ===== SECURITY HEADERS ===== */
 app.use((_req, res, next) => {
@@ -22,16 +23,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* ===== SESSION ===== */
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'wedding-secret-change-in-prod',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 2 * 60 * 60 * 1000, // 2 hours
-  },
+app.use(cookieSession({
+  name: 'session',
+  keys: [process.env.SESSION_SECRET || 'wedding-secret-change-in-prod'],
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: 2 * 60 * 60 * 1000, // 2 hours
 }));
 
 /* ===== HELPERS ===== */
@@ -98,7 +96,7 @@ app.post('/api/rsvp', async (req, res) => {
     return res.status(400).json({ error: 'Please indicate whether you will be attending.' });
   }
 
-  const VALID_MEALS = ['short_rib', 'chicken'];
+  const VALID_MEALS = ['short_rib', 'chicken', 'vegetarian'];
 
   try {
     const id = parseInt(guest_id, 10);
@@ -214,7 +212,8 @@ app.post('/admin/login', (req, res) => {
 });
 
 app.post('/admin/logout', requireAdmin, (req, res) => {
-  req.session.destroy(() => res.redirect('/admin'));
+  req.session = null;
+  res.redirect('/admin');
 });
 
 app.get('/admin/dashboard', requireAdmin, async (req, res) => {
@@ -235,13 +234,13 @@ app.get('/admin/dashboard', requireAdmin, async (req, res) => {
       if (r.bring_plus_one) totalPeople++; // person 2
     });
 
-    const mealCounts = { short_rib: 0, chicken: 0 };
+    const mealCounts = { short_rib: 0, chicken: 0, vegetarian: 0 };
     rows.forEach(r => {
       if (r.person1_meal) mealCounts[r.person1_meal] = (mealCounts[r.person1_meal] || 0) + 1;
       if (r.person2_meal) mealCounts[r.person2_meal] = (mealCounts[r.person2_meal] || 0) + 1;
     });
 
-    const mealLabel = { short_rib: 'Short Rib', chicken: 'Chicken' };
+    const mealLabel = { short_rib: 'Short Rib', chicken: 'Chicken', vegetarian: 'Vegetarian' };
 
     const rows_html = rows.map(r => {
       const status = !r.rsvp_submitted ? 'Pending'
@@ -317,6 +316,7 @@ app.get('/admin/dashboard', requireAdmin, async (req, res) => {
       <div class="stat"><div class="stat-value">${totalPeople}</div><div class="stat-label">Total Guests</div></div>
       <div class="stat"><div class="stat-value">${mealCounts.short_rib || 0}</div><div class="stat-label">Short Rib</div></div>
       <div class="stat"><div class="stat-value">${mealCounts.chicken || 0}</div><div class="stat-label">Chicken</div></div>
+      <div class="stat"><div class="stat-value">${mealCounts.vegetarian || 0}</div><div class="stat-label">Vegetarian</div></div>
     </div>
     <table>
       <thead>
@@ -345,7 +345,7 @@ app.get('/admin/export', requireAdmin, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM guests ORDER BY name');
 
-    const mealLabel = { short_rib: 'Short Rib', chicken: 'Chicken' };
+    const mealLabel = { short_rib: 'Short Rib', chicken: 'Chicken', vegetarian: 'Vegetarian' };
     const data = rows.map(r => ({
       'Name':              r.name,
       'Type':              r.type,
