@@ -66,7 +66,7 @@ const guests = [
   { name: 'Sheridan Rogers',                       type: 'N' },
   { name: 'Annie Ortizo',                          type: 'N' },
   { name: 'Kara Garland',                          type: 'N' },
-  { name: 'Tomek & Pecha Gadawski',                        type: 'Y' },
+  { name: 'Mr & Mrs Gadawski',                        type: 'Y' },
   { name: 'Michael Manson & Anita Feemster',        type: 'C' },
   { name: 'Jake Eshel & Brittany Burns',                       type: 'C' },
   { name: 'Maggie Wyszynski',                      type: 'Y' },
