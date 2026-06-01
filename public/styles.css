@@ -434,9 +434,7 @@ select:focus {
 }
 .meal-photo {
   width: 100%;
-  height: 180px;
-  object-fit: cover;
-  object-position: center 60%;
+  height: auto;
   display: block;
 }
 .meal-body {
