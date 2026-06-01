@@ -19,6 +19,7 @@
         <li><a href="#gallery">Our Story</a></li>
         <li><a href="#rsvp">RSVP</a></li>
         <li><a href="#venue">The Venue</a></li>
+        <li><a href="#activities">Activities</a></li>
       </ul>
     </div>
   </nav>
@@ -53,36 +54,65 @@
   <section id="gallery">
     <div class="container">
       <div class="section-header">
-        <p class="section-eyebrow">From Paris to Phoenix</p>
+        <p class="section-eyebrow">How It All Began</p>
         <h2 class="section-title">Our Story</h2>
         <div class="title-divider"></div>
       </div>
-      <div class="gallery-masonry">
-        <!-- Paris -->
-        <div class="gallery-item" data-index="0"><img src="/images/photo-01.jpg" alt="Mark and Ari at the Eiffel Tower" loading="lazy" /></div>
-        <div class="gallery-item" data-index="1"><img src="/images/photo-02.jpg" alt="Mark and Ari on the Seine" loading="lazy" /></div>
-        <!-- Engagement – saguaro series -->
-        <div class="gallery-item" data-index="2"><img src="/images/photo-03.jpg" alt="Engagement in Arizona" loading="lazy" /></div>
-        <div class="gallery-item" data-index="3"><img src="/images/photo-04.jpg" alt="Sunset kiss in Arizona" loading="lazy" /></div>
-        <div class="gallery-item" data-index="4"><img src="/images/photo-05.jpg" alt="The ring" loading="lazy" /></div>
-        <!-- Engagement – prickly pear series -->
-        <div class="gallery-item" data-index="5"><img src="/images/photo-06.jpg" alt="Mark and Ari in the garden" loading="lazy" /></div>
-        <div class="gallery-item" data-index="6"><img src="/images/photo-07.jpg" alt="Mark and Ari together" loading="lazy" /></div>
-        <div class="gallery-item" data-index="7"><img src="/images/photo-08.jpg" alt="Golden hour together" loading="lazy" /></div>
-        <div class="gallery-item" data-index="8"><img src="/images/photo-09.jpg" alt="A kiss in golden light" loading="lazy" /></div>
-        <div class="gallery-item" data-index="9"><img src="/images/photo-10.jpg" alt="Laughing together" loading="lazy" /></div>
-        <!-- Engagement – sunset forehead series -->
-        <div class="gallery-item" data-index="10"><img src="/images/photo-11.jpg" alt="Forehead to forehead" loading="lazy" /></div>
-        <div class="gallery-item" data-index="11"><img src="/images/photo-12.jpg" alt="Sunburst moment" loading="lazy" /></div>
-        <div class="gallery-item" data-index="12"><img src="/images/photo-13.jpg" alt="Reaching hands and the ring" loading="lazy" /></div>
-        <div class="gallery-item" data-index="13"><img src="/images/photo-14.jpg" alt="Almost a kiss" loading="lazy" /></div>
-        <div class="gallery-item" data-index="14"><img src="/images/photo-15.jpg" alt="A spinning kiss" loading="lazy" /></div>
-        <!-- Engagement – playful series -->
-        <div class="gallery-item" data-index="15"><img src="/images/photo-16.jpg" alt="Piggyback smiles" loading="lazy" /></div>
-        <div class="gallery-item" data-index="16"><img src="/images/photo-17.jpg" alt="Piggyback kiss" loading="lazy" /></div>
-        <div class="gallery-item" data-index="17"><img src="/images/photo-18.jpg" alt="Mark and Ari" loading="lazy" /></div>
-        <div class="gallery-item" data-index="18"><img src="/images/photo-19.jpg" alt="Swirling kiss" loading="lazy" /></div>
-        <div class="gallery-item" data-index="19"><img src="/images/photo-20.jpg" alt="A quiet moment" loading="lazy" /></div>
+      <div class="story-body">
+        <p class="story-para">We found each other the way most great things do — quietly, and without warning. It was sophomore year of college, brought together through mutual friends in Greek life. Neither of us said anything right away.</p>
+        <p class="story-para">For months, we each carried a quiet crush, apparently assuming the other wasn't interested — each of us waiting, each of us wrong. Thankfully, our friends eventually intervened, confirming what everyone around us seemed to already know.</p>
+        <p class="story-para">We made it official on November 24th, 2018, the night of the ASU vs. UofA game — a date Mark leaned on heavily in those early years when anniversaries came around. From the beginning, Ari was drawn to his humor and the genuine kindness behind it. Mark thought she was adorable and sweet. He still does.</p>
+        <p class="story-para">In the years since, we've grown — as individuals and together. We've cheered each other through the highs and steadied each other through the harder moments in between. Along the way, we added three thoroughly spoiled pets to our family and bought our first home in 2022, building something that is undeniably, entirely ours.</p>
+        <p class="story-para">Looking back on those early college days, neither of us could have predicted any of it. But standing here now, we think we can both say: it's exactly what we were hoping for.</p>
+      </div>
+      <div class="carousel" id="our-story-carousel">
+        <div class="car-track" id="car-track">
+          <button class="car-btn car-prev" id="car-prev" aria-label="Previous photo">&#8592;</button>
+          <button class="car-btn car-next" id="car-next" aria-label="Next photo">&#8594;</button>
+          <div class="car-slide active"><img src="/images/photo-02.jpg" alt="Mark and Ari on the Seine" /></div>
+          <div class="car-slide"><img src="/images/photo-03.jpg" alt="Engagement in Arizona" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-04.jpg" alt="Sunset kiss in Arizona" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-05.jpg" alt="The ring" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-06.jpg" alt="Mark and Ari in the garden" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-07.jpg" alt="Mark and Ari together" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-08.jpg" alt="Golden hour together" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-09.jpg" alt="A kiss in golden light" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-10.jpg" alt="Laughing together" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-11.jpg" alt="Forehead to forehead" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-12.jpg" alt="Sunburst moment" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-13.jpg" alt="Reaching hands and the ring" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-14.jpg" alt="Almost a kiss" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-15.jpg" alt="Piggyback smiles" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-16.jpg" alt="Piggyback kiss" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-17.jpg" alt="Mark and Ari" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-18.jpg" alt="Our first home" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-19.jpg" alt="Christmas together" loading="lazy" /></div>
+          <div class="car-slide"><img src="/images/photo-20.jpg" alt="An early evening out" loading="lazy" /></div>
+        </div>
+        <div class="car-footer">
+          <div class="car-dots" id="car-dots">
+            <button class="car-dot active" data-index="0" aria-label="Photo 1"></button>
+            <button class="car-dot" data-index="1" aria-label="Photo 2"></button>
+            <button class="car-dot" data-index="2" aria-label="Photo 3"></button>
+            <button class="car-dot" data-index="3" aria-label="Photo 4"></button>
+            <button class="car-dot" data-index="4" aria-label="Photo 5"></button>
+            <button class="car-dot" data-index="5" aria-label="Photo 6"></button>
+            <button class="car-dot" data-index="6" aria-label="Photo 7"></button>
+            <button class="car-dot" data-index="7" aria-label="Photo 8"></button>
+            <button class="car-dot" data-index="8" aria-label="Photo 9"></button>
+            <button class="car-dot" data-index="9" aria-label="Photo 10"></button>
+            <button class="car-dot" data-index="10" aria-label="Photo 11"></button>
+            <button class="car-dot" data-index="11" aria-label="Photo 12"></button>
+            <button class="car-dot" data-index="12" aria-label="Photo 13"></button>
+            <button class="car-dot" data-index="13" aria-label="Photo 14"></button>
+            <button class="car-dot" data-index="14" aria-label="Photo 15"></button>
+            <button class="car-dot" data-index="15" aria-label="Photo 16"></button>
+            <button class="car-dot" data-index="16" aria-label="Photo 17"></button>
+            <button class="car-dot" data-index="17" aria-label="Photo 18"></button>
+            <button class="car-dot" data-index="18" aria-label="Photo 19"></button>
+          </div>
+          <span class="car-counter" id="car-counter">1 / 19</span>
+        </div>
       </div>
     </div>
   </section>
@@ -250,6 +280,24 @@
 
     <div class="container venue-body">
 
+      <div class="venue-photo-grid">
+        <div class="photo-large venue-photo" id="photo-1">
+          <div class="photo-caption">El Jardín Courtyard</div>
+        </div>
+        <div class="photo-small venue-photo" id="photo-2">
+          <div class="photo-caption">Spanish Colonial Architecture</div>
+        </div>
+        <div class="photo-small venue-photo" id="photo-3">
+          <div class="photo-caption">Camelback Mountain Views</div>
+        </div>
+        <div class="photo-medium venue-photo" id="photo-4">
+          <div class="photo-caption">T. Cook's Restaurant</div>
+        </div>
+        <div class="photo-medium venue-photo" id="photo-5">
+          <div class="photo-caption">Alvadora Spa</div>
+        </div>
+      </div>
+
       <div class="venue-description">
         <p>
           Nestled at the foot of Camelback Mountain, the Royal Palms Resort &amp; Spa is one of
@@ -335,31 +383,14 @@
         <div class="venue-card">
           <div class="venue-card-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M24 8l4.24 8.59 9.48 1.38-6.86 6.69 1.62 9.43L24 29.5l-8.48 4.46 1.62-9.43-6.86-6.69 9.48-1.38L24 8z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M24 38s-16-9.5-16-20a10 10 0 0120 0 10 10 0 0120 0c0 10.5-16 20-16 20" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M16 18a4 4 0 014-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </div>
-          <h3>Wedding Planning</h3>
-          <p>A dedicated on-site wedding coordinator, award-winning catering, and a full vendor network to bring your vision to life.</p>
+          <h3>Built for Romance</h3>
+          <p>Originally designed as a private couple's retreat, Royal Palms has welcomed lovers for over a century — nine garden acres crafted for moments that last a lifetime.</p>
         </div>
 
-      </div>
-
-      <div class="venue-photo-grid">
-        <div class="photo-large venue-photo" id="photo-1">
-          <div class="photo-caption">El Jardín Courtyard</div>
-        </div>
-        <div class="photo-small venue-photo" id="photo-2">
-          <div class="photo-caption">Spanish Colonial Architecture</div>
-        </div>
-        <div class="photo-small venue-photo" id="photo-3">
-          <div class="photo-caption">Camelback Mountain Views</div>
-        </div>
-        <div class="photo-medium venue-photo" id="photo-4">
-          <div class="photo-caption">T. Cook's Restaurant</div>
-        </div>
-        <div class="photo-medium venue-photo" id="photo-5">
-          <div class="photo-caption">Alvadora Spa</div>
-        </div>
       </div>
 
       <div class="venue-cta">
@@ -367,6 +398,145 @@
         <a class="btn-outline" href="https://www.hyatt.com/unbound-collection/en-US/phxub-royal-palms-resort-and-spa" target="_blank" rel="noopener">Explore the Resort</a>
       </div>
 
+    </div>
+  </section>
+
+  <!-- DRESS CODE -->
+  <section id="dress-code">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">October 17, 2026</p>
+        <h2 class="section-title">Dress Code</h2>
+        <div class="title-divider"></div>
+      </div>
+      <div class="dress-card">
+        <div class="dress-icon">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M32 8c-4 0-8 2-10 5l-12 10 6 4 4-3v30h24V24l4 3 6-4-12-10c-2-3-6-5-10-5z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M24 13c0 4.418 3.582 8 8 8s8-3.582 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="dress-label">Wedding Attire</h3>
+        <p class="dress-desc">
+          Please dress to celebrate. Cocktail or formal attire is warmly encouraged —
+          our ceremony and reception will be held in the beautiful outdoor gardens of Royal Palms Resort.
+          October evenings in Phoenix are warm and golden, so dress to feel your most elegant.
+        </p>
+        <div class="dress-tips">
+          <div class="dress-tip">
+            <div class="dress-tip-icon">
+              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 4c-2 0-4 1-5 2.5L5 12l3 2 2-1.5V28h12V12.5L24 14l3-2-6-5.5C20 5 18 4 16 4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <strong>Gentlemen</strong>
+              <span>Suit, tuxedo, or dress shirt with trousers</span>
+            </div>
+          </div>
+          <div class="dress-tip">
+            <div class="dress-tip-icon">
+              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 3a4 4 0 100 8 4 4 0 000-8z" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M10 11l-4 18h20l-4-18" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M12 11l4 6 4-6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <strong>Ladies</strong>
+              <span>Cocktail dress, gown, or elegant jumpsuit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THINGS TO DO -->
+  <section id="activities">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Explore the Valley of the Sun</p>
+        <h2 class="section-title">While You're Here</h2>
+        <div class="title-divider"></div>
+      </div>
+      <div class="activities-grid">
+
+        <div class="activity-card">
+          <div class="activity-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 38L16 18l8 10 6-8 14 18H4z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+              <circle cx="36" cy="12" r="4" stroke="currentColor" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <h3>Camelback Mountain</h3>
+          <p class="activity-tag">Hiking · 0.2 miles from venue</p>
+          <p>The iconic summit right outside the resort. Echo Canyon Trail is a challenging 1.5-mile climb rewarded with panoramic views of the entire Valley. Go early — sunrise from the top is unforgettable.</p>
+        </div>
+
+        <div class="activity-card">
+          <div class="activity-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 6c0 0-14 12-14 24a14 14 0 0028 0C38 18 24 6 24 6z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M24 20v12M18 26h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Desert Botanical Garden</h3>
+          <p class="activity-tag">Nature · 10 minutes away</p>
+          <p>140 acres of stunning desert flora, including the world's largest collection of cacti. The garden glows at golden hour — an ideal stop for anyone wanting to experience the Sonoran Desert up close.</p>
+        </div>
+
+        <div class="activity-card">
+          <div class="activity-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 38V20l8-8 8 8 8-8 8 8v18H8z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M20 38V28h8v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Old Town Scottsdale</h3>
+          <p class="activity-tag">Dining &amp; Nightlife · 10 minutes away</p>
+          <p>Art galleries, boutique shops, rooftop bars, and acclaimed restaurants tucked into a walkable historic district. Grab dinner at Citizen Public House or drinks at Postino before the weekend festivities.</p>
+        </div>
+
+        <div class="activity-card">
+          <div class="activity-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 32c4-8 8-12 16-12s12 4 16 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M4 36h40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M12 28c2-4 6-8 12-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Sedona Red Rocks</h3>
+          <p class="activity-tag">Day Trip · 2 hours north</p>
+          <p>Otherworldly red sandstone formations, spiritual vortex sites, world-class spas, and some of the best hiking in the American Southwest. A perfect escape for the day before or after the wedding.</p>
+        </div>
+
+        <div class="activity-card">
+          <div class="activity-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 32h40M8 32V20M40 32V20M4 20h40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M16 20v-8l8-6 8 6v8" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Grand Canyon South Rim</h3>
+          <p class="activity-tag">Day Trip · 3.5 hours north</p>
+          <p>One of the seven natural wonders of the world is just a scenic drive away. Walk the Rim Trail, watch the sunrise over the canyon, or arrange a mule ride into the gorge. A once-in-a-lifetime stop.</p>
+        </div>
+
+        <div class="activity-card">
+          <div class="activity-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 40V20l10-12 10 12v20H14z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M20 40v-10h8v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 40h32" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Biltmore Fashion Park</h3>
+          <p class="activity-tag">Shopping &amp; Dining · 5 minutes away</p>
+          <p>An open-air luxury shopping destination steps from the Arizona Biltmore. Browse Saks Fifth Avenue, dine at True Food Kitchen, or simply enjoy a coffee in the shadow of Frank Lloyd Wright's masterpiece.</p>
+        </div>
+
+      </div>
     </div>
   </section>
 
