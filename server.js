@@ -109,21 +109,26 @@ app.post('/api/rsvp', async (req, res) => {
 
     const type = guest.type.trim();
 
-    if (attending) {
-      if (!VALID_MEALS.includes(meal1)) {
-        return res.status(400).json({ error: 'Please select a meal choice.' });
+    if (type === 'C') {
+      // For couples, attending = person1, bring_plus_one = person2
+      if (attending && !VALID_MEALS.includes(meal1)) {
+        return res.status(400).json({ error: `Please select a meal for person 1.` });
       }
-      if (type === 'C') {
-        if (!VALID_MEALS.includes(meal2)) {
-          return res.status(400).json({ error: 'Please select a meal for both guests.' });
-        }
+      if (bring_plus_one && !VALID_MEALS.includes(meal2)) {
+        return res.status(400).json({ error: `Please select a meal for person 2.` });
       }
-      if (type === 'Y' && bring_plus_one) {
-        if (!person2_name || !String(person2_name).trim()) {
-          return res.status(400).json({ error: "Please enter your plus one's name." });
+    } else {
+      if (attending) {
+        if (!VALID_MEALS.includes(meal1)) {
+          return res.status(400).json({ error: 'Please select a meal choice.' });
         }
-        if (!VALID_MEALS.includes(meal2)) {
-          return res.status(400).json({ error: "Please select a meal for your plus one." });
+        if (type === 'Y' && bring_plus_one) {
+          if (!person2_name || !String(person2_name).trim()) {
+            return res.status(400).json({ error: "Please enter your plus one's name." });
+          }
+          if (!VALID_MEALS.includes(meal2)) {
+            return res.status(400).json({ error: "Please select a meal for your plus one." });
+          }
         }
       }
     }
@@ -147,10 +152,10 @@ app.post('/api/rsvp', async (req, res) => {
         attending ? 1 : 0,
         attending ? meal1 : null,
         attending ? (dietary1 || null) : null,
-        attending && type !== 'N' ? (bring_plus_one ? 1 : 0) : null,
-        attending ? safeP2Name : null,
-        attending && (type === 'C' || (type === 'Y' && bring_plus_one)) ? meal2 : null,
-        attending && (type === 'C' || (type === 'Y' && bring_plus_one)) ? (dietary2 || null) : null,
+        type === 'C' ? (bring_plus_one ? 1 : 0) : (attending && type !== 'N' ? (bring_plus_one ? 1 : 0) : null),
+        (type === 'C' && bring_plus_one) ? safeP2Name : (attending ? safeP2Name : null),
+        (type === 'C' && bring_plus_one) ? meal2 : (attending && type === 'Y' && bring_plus_one ? meal2 : null),
+        (type === 'C' && bring_plus_one) ? (dietary2 || null) : (attending && type === 'Y' && bring_plus_one ? (dietary2 || null) : null),
         id,
       ]
     );

@@ -49,6 +49,8 @@ const person1Header        = document.getElementById('person1-header');
 const plusOneQuestion      = document.getElementById('plus-one-question');
 const person2Section       = document.getElementById('person2-section');
 const person2NameInputWrap = document.getElementById('person2-name-input-wrap');
+const singleAttendSection  = document.getElementById('single-attend-section');
+const coupleAttendSection  = document.getElementById('couple-attend-section');
 
 /* Parse "Joe & Stenia Kurpiel" → { person1: "Joe Kurpiel", person2: "Stenia Kurpiel" } */
 function parseCoupleName(name) {
@@ -129,6 +131,17 @@ btnNext.addEventListener('click', async () => {
 
     document.getElementById('guest-name-display').textContent = guest.name;
     resetForm();
+
+    if (guest.type === 'C') {
+      singleAttendSection.classList.add('hidden');
+      coupleAttendSection.classList.remove('hidden');
+      document.getElementById('p1-attend-label').textContent = currentNames.person1;
+      document.getElementById('p2-attend-label').textContent = currentNames.person2;
+    } else {
+      singleAttendSection.classList.remove('hidden');
+      coupleAttendSection.classList.add('hidden');
+    }
+
     showStep(stepForm);
   } catch {
     showError('Unable to load guest details. Please try again.');
@@ -137,35 +150,51 @@ btnNext.addEventListener('click', async () => {
 
 btnBack.addEventListener('click', () => { showStep(stepSelect); resetForm(); });
 
-/* Attending toggle */
+/* Attending toggle — N/Y types */
 document.querySelectorAll('input[name="attending"]').forEach(r => {
   r.addEventListener('change', () => {
     hideError();
     const attending = r.value === 'yes';
-
     person1Section.classList.toggle('hidden', !attending);
-
     if (attending) {
-      // Show person 1 name label only for couples
-      person1Header.classList.toggle('hidden', currentGuestType !== 'C');
+      person1Header.classList.add('hidden');
       document.getElementById('person1-label').textContent = currentNames.person1;
-
-      if (currentGuestType === 'C') {
-        // Couples: always show person 2 immediately
-        plusOneQuestion.classList.add('hidden');
-        person2Section.classList.remove('hidden');
-        person2NameInputWrap.classList.add('hidden');
-        document.getElementById('person2-label').textContent = currentNames.person2;
-      } else if (currentGuestType === 'Y') {
+      if (currentGuestType === 'Y') {
         plusOneQuestion.classList.remove('hidden');
         person2Section.classList.add('hidden');
       }
-      // N type: nothing extra
     } else {
-      person1Header.classList.add('hidden');
       plusOneQuestion.classList.add('hidden');
       person2Section.classList.add('hidden');
       document.querySelectorAll('input[name="bring_plus_one"]').forEach(x => x.checked = false);
+    }
+  });
+});
+
+/* Per-person attending — C type */
+document.querySelectorAll('input[name="person1_attending"]').forEach(r => {
+  r.addEventListener('change', () => {
+    hideError();
+    const attending = r.value === 'yes';
+    person1Section.classList.toggle('hidden', !attending);
+    if (attending) {
+      person1Header.classList.remove('hidden');
+      document.getElementById('person1-label').textContent = currentNames.person1;
+    }
+  });
+});
+
+document.querySelectorAll('input[name="person2_attending"]').forEach(r => {
+  r.addEventListener('change', () => {
+    hideError();
+    const attending = r.value === 'yes';
+    person2Section.classList.toggle('hidden', !attending);
+    if (attending) {
+      person2NameInputWrap.classList.add('hidden');
+      document.getElementById('person2-label').textContent = currentNames.person2;
+    } else {
+      document.querySelectorAll('input[name="meal2"]').forEach(x => x.checked = false);
+      document.getElementById('dietary2').value = '';
     }
   });
 });
@@ -195,40 +224,56 @@ document.getElementById('person2-name-input').addEventListener('input', e => {
 btnSubmit.addEventListener('click', async () => {
   hideError();
 
-  const attendingEl = document.querySelector('input[name="attending"]:checked');
-  if (!attendingEl) { showError('Please indicate whether you will be attending.'); return; }
-  const attending = attendingEl.value === 'yes';
-
+  let attending = false;
   let meal1 = null, dietary1 = null;
   let bring_plus_one = false, person2_name = null, meal2 = null, dietary2 = null;
 
-  if (attending) {
-    const m1 = document.querySelector('input[name="meal1"]:checked');
-    if (!m1) { showError('Please select your meal choice.'); return; }
-    meal1    = m1.value;
-    dietary1 = document.getElementById('dietary1').value.trim() || null;
+  if (currentGuestType === 'C') {
+    const p1El = document.querySelector('input[name="person1_attending"]:checked');
+    const p2El = document.querySelector('input[name="person2_attending"]:checked');
+    if (!p1El) { showError(`Please indicate if ${currentNames.person1} will be attending.`); return; }
+    if (!p2El) { showError(`Please indicate if ${currentNames.person2} will be attending.`); return; }
 
-    if (currentGuestType === 'C') {
+    attending      = p1El.value === 'yes';
+    bring_plus_one = p2El.value === 'yes';
+
+    if (attending) {
+      const m1 = document.querySelector('input[name="meal1"]:checked');
+      if (!m1) { showError(`Please select a meal for ${currentNames.person1}.`); return; }
+      meal1    = m1.value;
+      dietary1 = document.getElementById('dietary1').value.trim() || null;
+    }
+    if (bring_plus_one) {
+      person2_name = currentNames.person2;
       const m2 = document.querySelector('input[name="meal2"]:checked');
       if (!m2) { showError(`Please select a meal for ${currentNames.person2}.`); return; }
-      meal2         = m2.value;
-      dietary2      = document.getElementById('dietary2').value.trim() || null;
-      person2_name  = currentNames.person2;
-      bring_plus_one = true;
+      meal2    = m2.value;
+      dietary2 = document.getElementById('dietary2').value.trim() || null;
     }
+  } else {
+    const attendingEl = document.querySelector('input[name="attending"]:checked');
+    if (!attendingEl) { showError('Please indicate whether you will be attending.'); return; }
+    attending = attendingEl.value === 'yes';
 
-    if (currentGuestType === 'Y') {
-      const poEl = document.querySelector('input[name="bring_plus_one"]:checked');
-      if (!poEl) { showError('Please indicate whether you will be bringing a plus one.'); return; }
-      bring_plus_one = poEl.value === 'yes';
+    if (attending) {
+      const m1 = document.querySelector('input[name="meal1"]:checked');
+      if (!m1) { showError('Please select your meal choice.'); return; }
+      meal1    = m1.value;
+      dietary1 = document.getElementById('dietary1').value.trim() || null;
 
-      if (bring_plus_one) {
-        person2_name = document.getElementById('person2-name-input').value.trim();
-        if (!person2_name) { showError("Please enter your plus one's name."); return; }
-        const m2 = document.querySelector('input[name="meal2"]:checked');
-        if (!m2) { showError("Please select a meal for your plus one."); return; }
-        meal2    = m2.value;
-        dietary2 = document.getElementById('dietary2').value.trim() || null;
+      if (currentGuestType === 'Y') {
+        const poEl = document.querySelector('input[name="bring_plus_one"]:checked');
+        if (!poEl) { showError('Please indicate whether you will be bringing a plus one.'); return; }
+        bring_plus_one = poEl.value === 'yes';
+
+        if (bring_plus_one) {
+          person2_name = document.getElementById('person2-name-input').value.trim();
+          if (!person2_name) { showError("Please enter your plus one's name."); return; }
+          const m2 = document.querySelector('input[name="meal2"]:checked');
+          if (!m2) { showError("Please select a meal for your plus one."); return; }
+          meal2    = m2.value;
+          dietary2 = document.getElementById('dietary2').value.trim() || null;
+        }
       }
     }
   }
@@ -266,8 +311,10 @@ function showStep(step) {
 }
 
 function resetForm() {
-  document.querySelectorAll('input[name="attending"], input[name="meal1"], input[name="meal2"], input[name="bring_plus_one"]')
-    .forEach(r => r.checked = false);
+  document.querySelectorAll(
+    'input[name="attending"], input[name="person1_attending"], input[name="person2_attending"], ' +
+    'input[name="meal1"], input[name="meal2"], input[name="bring_plus_one"]'
+  ).forEach(r => r.checked = false);
   document.getElementById('person2-name-input').value = '';
   document.getElementById('dietary1').value = '';
   document.getElementById('dietary2').value = '';
@@ -278,6 +325,8 @@ function resetForm() {
   plusOneQuestion.classList.add('hidden');
   person2Section.classList.add('hidden');
   person2NameInputWrap.classList.add('hidden');
+  coupleAttendSection.classList.add('hidden');
+  singleAttendSection.classList.remove('hidden');
   hideError();
   btnSubmit.disabled = false;
   btnSubmit.textContent = 'Submit RSVP';
@@ -294,22 +343,23 @@ function hideError() { formError.classList.add('hidden'); }
 /* ===== INIT ===== */
 loadGuests();
 
-/* ===== GALLERY LIGHTBOX ===== */
+/* ===== LIGHTBOX ===== */
+let openLightbox = null;
 (function () {
-  const items   = [...document.querySelectorAll('.gallery-item')];
+  const slides  = [...document.querySelectorAll('.car-slide')];
   const lb      = document.getElementById('lightbox');
   const lbImg   = document.getElementById('lb-img');
   const lbCount = document.getElementById('lb-counter');
   let current   = 0;
 
-  function open(index) {
+  openLightbox = function (index) {
     current = index;
-    lbImg.src = items[index].querySelector('img').src;
-    lbImg.alt = items[index].querySelector('img').alt;
-    lbCount.textContent = `${index + 1} / ${items.length}`;
+    lbImg.src = slides[index].querySelector('img').src;
+    lbImg.alt = slides[index].querySelector('img').alt;
+    lbCount.textContent = `${index + 1} / ${slides.length}`;
     lb.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-  }
+  };
 
   function close() {
     lb.classList.add('hidden');
@@ -318,25 +368,72 @@ loadGuests();
   }
 
   function navigate(dir) {
-    current = (current + dir + items.length) % items.length;
+    current = (current + dir + slides.length) % slides.length;
     lbImg.src = '';
-    lbImg.src = items[current].querySelector('img').src;
-    lbImg.alt = items[current].querySelector('img').alt;
-    lbCount.textContent = `${current + 1} / ${items.length}`;
+    lbImg.src = slides[current].querySelector('img').src;
+    lbImg.alt = slides[current].querySelector('img').alt;
+    lbCount.textContent = `${current + 1} / ${slides.length}`;
   }
-
-  items.forEach((item, i) => item.addEventListener('click', () => open(i)));
 
   document.getElementById('lb-close').addEventListener('click', close);
   document.getElementById('lb-prev').addEventListener('click', (e) => { e.stopPropagation(); navigate(-1); });
   document.getElementById('lb-next').addEventListener('click', (e) => { e.stopPropagation(); navigate(1); });
-
   lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
 
   document.addEventListener('keydown', (e) => {
     if (lb.classList.contains('hidden')) return;
-    if (e.key === 'Escape')      close();
-    if (e.key === 'ArrowRight')  navigate(1);
-    if (e.key === 'ArrowLeft')   navigate(-1);
+    if (e.key === 'Escape')     close();
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft')  navigate(-1);
   });
+})();
+
+/* ===== CAROUSEL ===== */
+(function () {
+  const slides  = [...document.querySelectorAll('.car-slide')];
+  const dots    = [...document.querySelectorAll('.car-dot')];
+  const counter = document.getElementById('car-counter');
+  const total   = slides.length;
+  let current   = 0;
+  let timer     = null;
+
+  function goTo(index) {
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = (index + total) % total;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+    counter.textContent = `${current + 1} / ${total}`;
+  }
+
+  function startAuto() { timer = setInterval(() => goTo(current + 1), 5000); }
+  function stopAuto()  { clearInterval(timer); }
+  function resetAuto() { stopAuto(); startAuto(); }
+
+  document.getElementById('car-prev').addEventListener('click', (e) => { e.stopPropagation(); goTo(current - 1); resetAuto(); });
+  document.getElementById('car-next').addEventListener('click', (e) => { e.stopPropagation(); goTo(current + 1); resetAuto(); });
+
+  dots.forEach((dot, i) => dot.addEventListener('click', () => { goTo(i); resetAuto(); }));
+
+  const track = document.getElementById('car-track');
+  track.addEventListener('mouseenter', stopAuto);
+  track.addEventListener('mouseleave', startAuto);
+
+  track.addEventListener('click', () => { if (openLightbox) openLightbox(current); });
+
+  /* touch swipe */
+  let touchX = 0;
+  track.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) { goTo(dx < 0 ? current + 1 : current - 1); resetAuto(); }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!document.getElementById('lightbox').classList.contains('hidden')) return;
+    if (e.key === 'ArrowLeft')  { goTo(current - 1); resetAuto(); }
+    if (e.key === 'ArrowRight') { goTo(current + 1); resetAuto(); }
+  });
+
+  startAuto();
 })();

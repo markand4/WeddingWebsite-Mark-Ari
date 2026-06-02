@@ -188,8 +188,8 @@
         <div class="rsvp-step hidden" id="step-form">
           <p class="rsvp-greeting">Hello, <strong id="guest-name-display"></strong>!</p>
 
-          <!-- Attending -->
-          <fieldset class="field-group">
+          <!-- Attending — single question for N/Y types -->
+          <fieldset class="field-group" id="single-attend-section">
             <legend class="field-label">Will you be attending?</legend>
             <div class="radio-row">
               <label class="radio-card">
@@ -202,6 +202,37 @@
               </label>
             </div>
           </fieldset>
+
+          <!-- Attending — per-person for couples (C type) -->
+          <div class="hidden field-group" id="couple-attend-section">
+            <p class="field-label" style="margin-bottom:16px">Will you be attending?</p>
+            <div class="couple-person-row">
+              <span class="couple-person-name" id="p1-attend-label"></span>
+              <div class="radio-row">
+                <label class="radio-card">
+                  <input type="radio" name="person1_attending" value="yes" />
+                  <span class="radio-label">Joyfully accepts</span>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="person1_attending" value="no" />
+                  <span class="radio-label">Regretfully declines</span>
+                </label>
+              </div>
+            </div>
+            <div class="couple-person-row" style="margin-top:12px">
+              <span class="couple-person-name" id="p2-attend-label"></span>
+              <div class="radio-row">
+                <label class="radio-card">
+                  <input type="radio" name="person2_attending" value="yes" />
+                  <span class="radio-label">Joyfully accepts</span>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="person2_attending" value="no" />
+                  <span class="radio-label">Regretfully declines</span>
+                </label>
+              </div>
+            </div>
+          </div>
 
           <!-- Person 1 meal + dietary (always shown when attending) -->
           <div class="hidden" id="person1-section">

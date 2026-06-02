@@ -333,6 +333,14 @@ body {
   margin-bottom: 28px;
 }
 .field-group.hidden { display: none; }
+.couple-person-name {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
 
 .select-wrapper {
   position: relative;
